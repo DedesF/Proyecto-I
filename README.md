@@ -1,2 +1,1 @@
-# Proyecto_1
-Proyecto uno para el curso de data science
+# Proy_uno
