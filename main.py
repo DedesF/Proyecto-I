@@ -73,6 +73,13 @@ def score_titulo(titulo_de_la_filmacion:str):
 
     titulo_de_la_filmacion = titulo_de_la_filmacion.title().strip() #Normalizamos el string
 
+    try:# Verificamos si el título existe en el DataFrame
+        # Filtramos el DataFrame y obtenemos la primera coincidencia
+        film_data = df[df['title'] == titulo_de_la_filmacion].iloc[0]
+    except IndexError:
+        # Lanzamos una excepción si el título no existe
+        raise HTTPException(status_code=404, detail="Película no encontrada")
+
     row_number = df.index.get_loc(df[df['title'] == titulo_de_la_filmacion].index[0])
     anio = int(df['year'][row_number])
     score = float(df['popularity'][row_number])    
