@@ -8,8 +8,8 @@ app = FastAPI(debug=True)
 
 df = pd.read_csv('Datasets/joined_dataset.csv')
 df_dir = pd.read_csv('Datasets/directores.csv')
-df_for_analisys = pd.read_pickle('Analisis\peliculas.pkl')
-similaridad = pd.read_pickle('Analisis\similaridad.pkl')
+df_for_analisys = pd.read_pickle('Analisis/peliculas.pkl')
+similaridad = pd.read_pickle('Analisis/similaridad.pkl')
 
 #df = pd.read_csv('C:\Python\HENRY-Data-Science\Proyecto_1\Datasets\joined_dataset.csv')
 #df_dir = pd.read_csv('C:\Python\HENRY-Data-Science\Proyecto_1\Datasets\directores.csv')
