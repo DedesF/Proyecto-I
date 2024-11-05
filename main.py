@@ -1,36 +1,42 @@
+#Se importan las librerías necesarias para mnejar los dataset (pandas) y comunicarse con FastApi
+
 import pandas as pd
 from fastapi import FastAPI, HTTPException
 
+
+#Inicializamos la aplicación de FastAPI y habilitamos el modo debug para recibir mensajes de error detallados en caso de problemas.
 app = FastAPI(debug=True)
 
-#Cargamos los datasets
+#Cargamos los datasets y los modelos exportados de pickle para el machine learning
 
 
+'''------------------ Dataset para despliegue en servidor --------------------------'''
 df = pd.read_csv('Datasets/joined_dataset.csv')
 df_dir = pd.read_csv('Datasets/directores.csv')
 df_for_analisys = pd.read_pickle('Analisis/peliculas.pkl')
 similaridad = pd.read_pickle('Analisis/similaridad.pkl')
 
+'''------------------ Dataset para despliegue local --------------------------'''
 #df = pd.read_csv('C:\Python\HENRY-Data-Science\Proyecto_1\Datasets\joined_dataset.csv')
 #df_dir = pd.read_csv('C:\Python\HENRY-Data-Science\Proyecto_1\Datasets\directores.csv')
 #df_for_analisys = pd.read_pickle('C:\Python\HENRY-Data-Science\Proyecto_1\Analisis\peliculas.pkl')
 #similaridad = pd.read_pickle('C:\Python\HENRY-Data-Science\Proyecto_1\Analisis\similaridad.pkl')
 
+#Convertimos la columna de fechas a un formato de fecha para tratar los valores nulos o faltantes
 
 df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce') #nomralizamos la columna de fechas
 
 
 #Función que debe devolver la cantidad de películas que fueron estrenadas en el mes consultado en la totalidad del dataset.
-
 @app.get('/cantidad_filmaciones_mes/{mes}')
 def cantidad_filmaciones_mes(mes:str):
 
-    mes = mes.lower().strip()
+    mes = mes.lower().strip()  #Normalizamos el mes ingresado a minúsculas y eliminamos espacios
     meses_anio = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 
                 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 
                 'noviembre', 'diciembre']
     
-    # Validamos si el día es correcto
+    # Validamos si el día es válido
     if mes not in meses_anio:
         raise HTTPException(status_code=404, detail="Mes no válido")
     
@@ -46,7 +52,7 @@ def cantidad_filmaciones_mes(mes:str):
     return {f"{cantidad} cantidad de películas fueron estrenadas en el mes de {mes}"}
 
 
-#Función que devolve la cantidad de películas que fueron estrenadas en el día consultado en la totalidad del dataset.
+#Función que devuelve la cantidad de películas que fueron estrenadas en el día consultado en la totalidad del dataset.
 
 @app.get('/cantidad_filmaciones_dia/{dia}')
 def cantidad_filmaciones_dia(dia:str):
@@ -172,7 +178,8 @@ def get_director(nombre_director: str):
     # Creamos la lista de detalles de cada película
     films_detail = []
     for _, row in director_films.iterrows():
-        
+
+    #Creamos un diccionario para almacenar el conjunto de datos solicitados    
         film_info = {"title": row['title'],
                     "release_date": row['release_date'],
                     "return": row['return'],
@@ -185,26 +192,35 @@ def get_director(nombre_director: str):
             "total_return": total_return,
             "films": films_detail}
 
-
+#Función que permite obtener las peliculas recomendadas que son similares a la consultada basada en un modelo de ML
 @app.get('/recomendacion/{pelicula}')
 def recomendacion(pelicula:str):
+
+    #Normalizamos el título y verificamos si hay existencia en el modelo, de no haber lanza un mensaje de error.
     pelicula = pelicula.title().strip()
 
     pelicula_fila = df_for_analisys[df_for_analisys['title'] == pelicula]
     if pelicula_fila.empty:
         raise HTTPException(status_code=404, detail="La película no fue encontrada")
     
+    #Calculamos las recomendaciones basándonos en la similitud de la película con otras en la matriz de similitud.
     indice = pelicula_fila.index[0]
 
+    #Se valida la matriz de similitud asegurándose de que esté cargada y bien configurada. De no estar configurada o cargada
+    #lanza un mensaje de error
+        
     if 'similaridad' not in globals() or len(similaridad) != len(df_for_analisys):
         raise ValueError("La matriz de similaridad no está definida correctamente o no coincide con los datos.")
 
     recomendaciones = []
 
     indice = df_for_analisys[df_for_analisys['title'] == pelicula].index[0]
-
+    
+    
+    #Calcula la distancia de los vectores para  conseguir las películas más cercanas entre ellas
     distancia = sorted(list(enumerate(similaridad[indice])), reverse=True, key=lambda x: x[1])
 
+    #Recorre las 5 primeras películas, dejando afuera el índice 0 ya que hace referencia a la misma película, y devuelve una lista
     for i in distancia[1:6]:
         recomendaciones.append(df_for_analisys.iloc[i[0]].title)
     return recomendaciones
