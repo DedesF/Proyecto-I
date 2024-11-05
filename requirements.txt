@@ -1,5 +1,3 @@
 pandas
-seaborn
 fastapi
 uvicorn
-scikit-learn
