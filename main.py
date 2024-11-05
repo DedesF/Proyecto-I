@@ -1,6 +1,10 @@
 import pandas as pd
 from fastapi import FastAPI, HTTPException
-#from datetime import date
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import ast
+import pickle
 
 app = FastAPI(debug=True)
 
@@ -9,9 +13,12 @@ app = FastAPI(debug=True)
 
 #df = pd.read_csv('Datasets/joined_dataset.csv')
 #df_dir = pd.read_csv('Datasets/directores.csv')
+#df_for_analisys = pd.read_csv('Datasets\dataset_recomendaciones.csv')
 
 df = pd.read_csv('C:\Python\HENRY-Data-Science\Proyecto_1\Datasets\joined_dataset.csv')
 df_dir = pd.read_csv('C:\Python\HENRY-Data-Science\Proyecto_1\Datasets\directores.csv')
+df_for_analisys = pd.read_pickle('C:\Python\HENRY-Data-Science\Proyecto_1\Analisis\peliculas.pkl')
+similaridad = pd.read_pickle('C:\Python\HENRY-Data-Science\Proyecto_1\Analisis\similaridad.pkl')
 
 
 df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce') #nomralizamos la columna de fechas
@@ -181,3 +188,18 @@ def get_director(nombre_director: str):
     return {"director": nombre_director,
             "total_return": total_return,
             "films": films_detail}
+
+
+@app.get('/recomendacion/{pelicula}')
+def recomendacion(pelicula:str):
+    pelicula = pelicula.title().strip()
+
+    recomendaciones = []
+
+    indice = df_for_analisys[df_for_analisys['title'] == pelicula].index[0]
+
+    distancia = sorted(list(enumerate(similaridad[indice])), reverse=True, key=lambda x: x[1])
+
+    for i in distancia[1:6]:
+        recomendaciones.append(df_for_analisys.iloc[i[0]].title)
+    return recomendaciones
