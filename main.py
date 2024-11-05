@@ -190,9 +190,14 @@ def get_director(nombre_director: str):
 def recomendacion(pelicula:str):
     pelicula = pelicula.title().strip()
 
-    titulo = df[df['title'] == pelicula]
-    if titulo.empty:
+    pelicula_fila = df_for_analisys[df_for_analisys['title'] == pelicula]
+    if pelicula_fila.empty:
         raise HTTPException(status_code=404, detail="La película no fue encontrada")
+    
+    indice = pelicula_fila.index[0]
+
+    if 'similaridad' not in globals() or len(similaridad) != len(df_for_analisys):
+        raise ValueError("La matriz de similaridad no está definida correctamente o no coincide con los datos.")
 
     recomendaciones = []
 
