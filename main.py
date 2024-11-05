@@ -190,9 +190,8 @@ def get_director(nombre_director: str):
 def recomendacion(pelicula:str):
     pelicula = pelicula.title().strip()
 
-    try:
-        pelicula = df[df['title'] == pelicula].iloc[0]
-    except IndexError:
+    titulo = df[df['title'] == pelicula]
+    if titulo.empty:
         raise HTTPException(status_code=404, detail="La película no fue encontrada")
 
     recomendaciones = []
