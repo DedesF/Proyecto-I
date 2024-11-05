@@ -7,11 +7,11 @@ app = FastAPI(debug=True)
 #Cargamos los datasets
 
 
-df = pd.read_csv('Datasets/joined_dataset.csv')
-df_dir = pd.read_csv('Datasets/directores.csv')
+#df = pd.read_csv('Datasets/joined_dataset.csv')
+#df_dir = pd.read_csv('Datasets/directores.csv')
 
-#df = pd.read_csv('C:/Users/house/Desktop/joined_dataset.csv')
-#df_dir = pd.read_csv('C:/Users/house/Desktop/directores.csv')
+df = pd.read_csv('C:\Python\HENRY-Data-Science\Proyecto_1\Datasets\joined_dataset.csv')
+df_dir = pd.read_csv('C:\Python\HENRY-Data-Science\Proyecto_1\Datasets\directores.csv')
 
 
 df['release_date'] = pd.to_datetime(df['release_date'], errors='coerce') #nomralizamos la columna de fechas
