@@ -1,135 +1,66 @@
-<p align=center><img src=https://d31uz8lwfmyn8g.cloudfront.net/Assets/logo-henry-white-lg.png><p>
+# PROYECTO INDIVIDUAL UNO
 
-# `<h1 align=center>` **PROYECTO INDIVIDUAL Nº1** `</h1>`
+Proyecto individual del curso de data science part-time de Henry
 
-# `<h1 align=center>`**`Machine Learning Operations (MLOps)`**`</h1>`
+## Índice
 
-<p align="center">
-<img src="https://user-images.githubusercontent.com/67664604/217914153-1eb00e25-ac08-4dfa-aaf8-53c09038f082.png"  height=300>
-</p>
+1. Objetivo
+2. Descripción del proyecto
+3. Data Engineering
+   1. ETL
+   2. EDA
+4. Levanamiento en FastAPI
+5. Deploying
+6. Video de presentación
 
-¡Bienvenidos al primer proyecto individual de la etapa de labs! En esta ocasión, deberán hacer un trabajo situándose en el rol de un ***MLOps Engineer***.
+## Objetivos
 
-<hr>
+El objetivo del proyecto es aplicar los conocimiento adquiridos durante los módulos teóricos para armar un sistema de recomendación de películas en el que el usuario pueda conocer alternativas a películas que le hayan gustado
 
-## **Descripción del problema (Contexto y rol a desarrollar)**
+## Descripción del proyecto
 
-## Contexto
+Cumpliremos el rol de un data engineer que provee servicio de agregación de plataformas de streaming donde tendremos que crear un sistema de recomendación que aún no ha sido puesto en marcha. Para esto debemos tomar una base de datos cruda con nula madurez de los mismos (datos anidados, sin transformar, nulos, etc) y aplicar un **ETL** que nos permita trabajar con ellos.
 
-Tienes tu modelo de recomendación dando unas buenas métricas 😏, y ahora, cómo lo llevas al mundo real? 👀
+Una vez normalizados los datos debemos proceder a trabajar con ellos para hacer un **EDA** y construir a partir de ahí nuestro sistema de recomendación.
 
-El ciclo de vida de un proyecto de Machine Learning debe contemplar desde el tratamiento y recolección de los datos (Data Engineer stuff) hasta el entrenamiento y mantenimiento del modelo de ML según llegan nuevos datos.
+## Data Engineering
 
-## Rol a desarrollar
+### ETL
 
-Empezaste a trabajar como **`Data Scientist`** en una start-up que provee servicios de agregación de plataformas de streaming. El mundo es bello y vas a crear tu primer modelo de ML que soluciona un problema de negocio: un sistema de recomendación que aún no ha sido puesto en marcha!
+En ciencia de datos, un **ETL** (Extract, Transform, Load) es un proceso de tres pasos que permite recopilar, transformar y cargar datos desde diversas fuentes hacia una base de datos o un sistema de almacenamiento. Este proceso es fundamental para preparar los datos antes de que puedan analizarse, ya que garantiza que estén en el formato y la calidad adecuados. Veamos cada paso en detalle para asociarlos con el proyecto:
 
-Vas a sus datos y te das cuenta que la madurez de los mismos es poca (ok, es nula 😭): Datos anidados, sin transformar, no hay procesos automatizados para la actualización de nuevas películas o series, entre otras cosas….  haciendo tu trabajo imposible 😩.
+* **Extract (Extracción):** En esta fase, recopilamos los datos desde 2 datasets en formato .csv proporcionados por los repositorios de Henry, uno llamado dataset_movies.csv y el otro credits.csv. La información recibida venía cruda, por lo que nos topamos con información mal ingresada, en formato no corespondientes, valores nulos entre otros.
+* **Transform (Transformación):** Una vez que se cargaron los datos se procedio a:
+  * Hacer la limpieza de datos (remover duplicados, tratar valores nulos o inconsistentes).
+  * Normalizar los datos, vale decir, transformarlos a sus tipos correspondientes, verificar que los strings tengan el mismo formato, etc.
+  * Filtrado y selección de de los datos que serán usados para el modelo. Se elimina información del dataset que no es necesaria para nuestro objetivo.
+  * Enriquecimos los datos creando o agregando información que nos será de utilidad.
+* **Load (Carga):** Una vez transformado el dataset lo guardamos para poder cargarlo a los repositorios con el fin de ser usados para nuestros modelos.
 
-Debes empezar desde 0, haciendo un trabajo rápido de **`Data Engineer`** y tener un **`MVP`** (_Minimum Viable Product_) para las próximas semanas! Tu cabeza va a explotar 🤯, pero al menos sabes cual es, conceptualmente, el camino que debes de seguir ❗️. Así que te espantas los miedos y te pones manos a la obra 💪
+### EDA
 
-<p align="center">
-<img src="https://github.com/HX-PRomero/PI_ML_OPS/raw/main/src/DiagramaConceptualDelFlujoDeProcesos.png"  height=500>
-</p>
+La segunda etapa en la manipulación de los datos es el **EDA** (Exploratory Data Analysis) o Análisis Exploratorio de Datos por sus siglas en inglés. en esta etapa hacemos la investigación y tratamos de entender el conjunto de datos antes de aplicar modelos o técnicas analíticas. Con los datasets generados en el **ETL** buscamos relaciones basadas en el resumen , el género y el título de cada película a fin de identificar patrones que se puedan usar para la recomendación.
 
-`<sub>` Nota que aqui se reflejan procesos no herramientas tecnologicas. Has el ejercicio de entender cual herramienta del stack corresponde a cual parte del proceso `<sub/>`
+Para este proyecto usamos la librería de scikit-learn con lo módulos de TfidfVectorizer que transforma el texto a una matriz numérica hecha con los principios de TF, que entre más aparece una palabra específica en un texto específico más importante es, y IDF, que entre mas aparece una palabra en diferentes textos menos importante es, para luego con el modulo de cosine_similarity encontrar las distancias más cercanas que representarían las películas con mayor similitud y que serán usadas para recomendación
 
-## **Propuesta de trabajo (requerimientos de aprobación)**
+## Levantamiento en FastAPI
 
-**`Transformaciones`**:  Para este MVP no necesitas perfección, ¡necesitas rapidez! ⏩ Vas a hacer estas, ***y solo estas***, transformaciones a los datos:
+Para ejecutar y alojar nuestra aplicación creada para un entorno de producción usaremos **FastAPI**. En ella haremos el levantamiento de todas las funciones creadas para nuestro programa:
 
-+ Algunos campos, como **`belongs_to_collection`**, **`production_companies`** y otros (ver diccionario de datos) están anidados, esto es o bien tienen un diccionario o una lista como valores en cada fila, ¡deberán desanidarlos para poder  y unirlos al dataset de nuevo hacer alguna de las consultas de la API! O bien buscar la manera de acceder a esos datos sin desanidarlos.
-+ Los valores nulos de los campos **`revenue`**, **`budget`** deben ser rellenados por el número **`0`**.
-+ Los valores nulos del campo **`release date`** deben eliminarse.
-+ De haber fechas, deberán tener el formato **`AAAA-mm-dd`**, además deberán crear la columna **`release_year`** donde extraerán el año de la fecha de estreno.
-+ Crear la columna con el retorno de inversión, llamada **`return`** con los campos **`revenue`** y **`budget`**, dividiendo estas dos últimas **`revenue / budget`**, cuando no hay datos disponibles para calcularlo, deberá tomar el valor **`0`**.
-+ Eliminar las columnas que no serán utilizadas, **`video`**,**`imdb_id`**,**`adult`**,**`original_title`**,**`poster_path`** y **`homepage`**.
+1. **cantidad_filmaciones_mes()** --> podremos ver la cantidad de filmaciones hecha en determinado mes del año
+2. **cantidad_filmaciones_dia()** --> podemos ver la cantidad de filmaciones hechas según el día de la semana
+3. **score_titulo()** --> podemos ver la puntuación obtenida por determinado título segun valoraciones de la gente
+4. **votos_titulo()** --> podemos ver la cantidad de votos y el promedio de esos votos por título
+5. **get_actor()** --> podemos ver la cantidad de películas filamdas por actor y sus ganancias
+6. **get_director()** --> obtenemos un listado con todas las películas del director en orden de relevancia según ganancias
+7. **recomendacion()** --> Esta película nos recomienda 5 películas similares ordenadas de mayor a menor puntuación de similaridad
 
-<br/>
+## Deploying
 
-**`Desarrollo API`**:   Propones disponibilizar los datos de la empresa usando el framework ***FastAPI***. Las consultas que propones son las siguientes:
+Para hacer el deploying del proyecto para que pueda ser visto por cualquier persona a través de un servidor web se ha usado RENDER RENDER nos permite cargar toda nuestra documentación (dataset, requirements, etc) y levantar el proyecto a través de un servicio web para que pueda ser consumido por la empresa y lo usuarios que lo necesiten.
 
-Deben crear 6 funciones para los endpoints que se consumirán en la API, recuerden que deben tener un decorador por cada una (@app.get(‘/’)).
+Se debe acceder al proyecto a través del siguiente link:
 
-+ def **cantidad_filmaciones_mes( *`Mes`* )**:
-  Se ingresa un mes en idioma Español. Debe devolver la cantidad de películas que fueron estrenadas en el mes consultado en la totalidad del dataset.
+[https://proy-uno.onrender./docs](https://proy-uno.onrender.com/docs)
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ejemplo de retorno: *`X` cantidad de películas fueron estrenadas en el mes de `X`*
-
-+ def **cantidad_filmaciones_dia( *`Dia`* )**:
-  Se ingresa un día en idioma Español. Debe devolver la cantidad de películas que fueron estrenadas en día consultado en la totalidad del dataset.
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ejemplo de retorno: *`X` cantidad de películas fueron estrenadas en los días `X`*
-
-+ def **score_titulo( *`titulo_de_la_filmación`* )**:
-  Se ingresa el título de una filmación esperando como respuesta el título, el año de estreno y el score.
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ejemplo de retorno: *La película `X` fue estrenada en el año `X` con un score/popularidad de `X`*
-
-+ def **votos_titulo( *`titulo_de_la_filmación`* )**:
-  Se ingresa el título de una filmación esperando como respuesta el título, la cantidad de votos y el valor promedio de las votaciones. La misma variable deberá de contar con al menos 2000 valoraciones, caso contrario, debemos contar con un mensaje avisando que no cumple esta condición y que por ende, no se devuelve ningun valor.
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ejemplo de retorno: *La película `X` fue estrenada en el año `X`. La misma cuenta con un total de `X` valoraciones, con un promedio de `X`*
-
-+ def **get_actor( *`nombre_actor`* )**:
-  Se ingresa el nombre de un actor que se encuentre dentro de un dataset debiendo devolver el éxito del mismo medido a través del retorno. Además, la cantidad de películas que en las que ha participado y el promedio de retorno. **La definición no deberá considerar directores.**
-
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ejemplo de retorno: *El actor `X` ha participado de `X` cantidad de filmaciones, el mismo ha conseguido un retorno de `X` con un promedio de `X` por filmación*
-
-+ def **get_director( *`nombre_director`* )**:
-  Se ingresa el nombre de un director que se encuentre dentro de un dataset debiendo devolver el éxito del mismo medido a través del retorno. Además, deberá devolver el nombre de cada película con la fecha de lanzamiento, retorno individual, costo y ganancia de la misma.
-
-<br/>
-
-**`Deployment`**: Conoces sobre [Render](https://render.com/docs/free#free-web-services) y tienes un [tutorial de Render](https://github.com/HX-FNegrete/render-fastapi-tutorial) que te hace la vida mas facil 😄 . Tambien podrias usar [Railway](https://railway.app/), o cualquier otro servicio que permita que la API pueda ser consumida desde la web.
-
-<br/>
-
-**`Análisis exploratorio de los datos`**: _(Exploratory Data Analysis-EDA)_
-
-Ya los datos están limpios, ahora es tiempo de investigar las relaciones que hay entre las variables de los datasets, ver si hay outliers o anomalías (que no tienen que ser errores necesariamente 👀 ), y ver si hay algún patrón interesante que valga la pena explorar en un análisis posterior. Las nubes de palabras dan una buena idea de cuáles palabras son más frecuentes en los títulos, ¡podría ayudar al sistema de recomendación!😉
-
-**`Sistema de recomendación`**:
-
-Una vez que toda la data es consumible por la API, está lista para consumir por los departamentos de Analytics y Machine Learning, y nuestro EDA nos permite entender bien los datos a los que tenemos acceso, es hora de entrenar nuestro modelo de machine learning para armar un sistema de recomendación de películas. El EDA debería incluir gráficas interesantes para extraer datos, como por ejemplo una nube de palabras con las palabras más frecuentes en los títulos de las películas. Éste consiste en recomendar películas a los usuarios basándose en películas similares, por lo que se debe encontrar la similitud de puntuación entre esa película y el resto de películas, se ordenarán según el score de similaridad y devolverá una lista de Python con 5 valores, cada uno siendo el string del nombre de las películas con mayor puntaje, en orden descendente. Debe ser deployado como una función adicional de la API anterior y debe llamarse:
-
-+ def **recomendacion( *`titulo`* )**:
-  Se ingresa el nombre de una película y te recomienda las similares en una lista de 5 valores.
-
-<br/>
-
-**`Video`**: Necesitas que al equipo le quede claro que tus herramientas funcionan realmente! Haces un video mostrando el resultado de las consultas propuestas y de tu modelo de ML entrenado!
-
-`<sub>` **Spoiler**: El video NO DEBE durar mas de ***7 minutos*** y DEBE mostrar las consultas requeridas en funcionamiento desde la API y una breve explicacion del modelo utilizado para el sistema de recomendacion. En caso de que te sobre tiempo luego de grabarlo, puedes mostrar explicar tu EDA, ETL e incluso cómo desarrollaste la API. `<sub/>`
-
-<br/>
-
-## **Criterios de evaluación**
-
-**`Código`**: Prolijidad de código, uso de clases y/o funciones, en caso de ser necesario, código comentado.
-
-**`Repositorio`**: Nombres de archivo adecuados, uso de carpetas para ordenar los archivos, README.md presentando el proyecto y el trabajo realizado. Recuerda que este último corresponde a la guía de tu proyecto, no importa que tan corto/largo sea siempre y cuando tu 'yo' + 1.5 AÑOS pueda entenderlo con facilidad.
-
-**`Cumplimiento`** de los requerimientos de aprobación indicados en el apartado `Propuesta de trabajo`
-
-NOTA: Recuerde entregar el link de acceso al video. Puede alojarse en YouTube, Drive o cualquier plataforma de almacenamiento. **Verificar que sea de acceso público, recomendamos usar modo incógnito en tu navegador para confirmarlo**.
-
-<br/>
-Aqui te sintetizamos que es lo que consideramos un MVP aprobatorio, y la diferencia con un producto completo.
-
-<p align="center">
-<img src="https://github.com/HX-PRomero/PI_ML_OPS/raw/main/src/MVP_MLops.PNG"  height=250>
-</p>
-
-## **Fuente de datos**
-
-- + [Dataset](https://drive.google.com/drive/folders/1X_LdCoGTHJDbD28_dJTxaD4fVuQC9Wt5?usp=drive_link): Carpeta con los 2 archivos con datos que requieren ser procesados (movies_dataset.csv y credits.csv), tengan en cuenta que hay datos que estan anidados (un diccionario o una lista como valores en la fila).
-
-+ [Diccionario de datos](https://docs.google.com/spreadsheets/d/1QkHH5er-74Bpk122tJxy_0D49pJMIwKLurByOfmxzho/edit#gid=0): Diccionario con algunas descripciones de las columnas disponibles en el dataset.
-  `<br/>`
-
-## **Material de apoyo**
-
-En este mismo repositorio podras encontrar algunos [links de ayuda](hhttps://github.com/HX-PRomero/PI_ML_OPS/raw/main/Material%20de%20apoyo.md). Recuerda que no son los unicos recursos que puedes utilizar!
-
-<br/>
+## Video de presentación
